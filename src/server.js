@@ -3,6 +3,9 @@ import 'express-async-errors'
 
 import routes from './routes/index.js'
 import ClientError from './utils/errors/ClientError.js'
+import runConnection from './database/knex/index.js'
+
+runConnection.migrate.latest()
 
 const app = express()
 const PORT = 3330
