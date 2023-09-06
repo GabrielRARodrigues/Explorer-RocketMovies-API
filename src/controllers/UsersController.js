@@ -63,6 +63,59 @@ class UsersController {
 
     return response.json()
   }
+
+  async update(request, response) {
+    const { name, email, password, old_password } = request.body
+    const { id } = request.params
+
+    const userSearched = await knex('users').where({ id }).first()
+
+    if (!userSearched) {
+      throw new ClientError('O usuário não foi encontrado')
+    }
+
+    if (email) {
+      const checkUserEmailAlreadyExists = await knex('users')
+        .where({ email })
+        .first()
+      if (
+        checkUserEmailAlreadyExists &&
+        checkUserEmailAlreadyExists.id !== userSearched.id
+      ) {
+        throw new ClientError('Este e-mail já está em uso.')
+      }
+    }
+
+    userSearched.name = name ? name : userSearched.name
+    userSearched.email = email ? email : userSearched.email
+
+    if (password && !old_password) {
+      throw new ClientError(
+        'Você precisa informar a senha antiga para definir a nova senha'
+      )
+    }
+
+    if (password && old_password) {
+      const checkOldPassword = await bcryptjs.compare(
+        old_password,
+        userSearched.password
+      )
+      if (!checkOldPassword) {
+        throw new ClientError('A senha antiga não confere')
+      }
+
+      userSearched.password = await bcryptjs.hash(password, 8)
+    }
+
+    await knex('users').where({ id }).update({
+      name: userSearched.name,
+      email: userSearched.email,
+      password: userSearched.password,
+      updated_at: knex.fn.now()
+    })
+
+    return response.status(200).json()
+  }
 }
 
 export default UsersController
