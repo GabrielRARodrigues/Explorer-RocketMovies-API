@@ -75,6 +75,118 @@ class NotesController {
 
     return response.json()
   }
+
+  async index(request, response) {
+    const { user_id, title, tags } = request.query
+
+    let notes = await knex('movie_notes').orderBy('title')
+    let baseTags = await knex('movie_tags').orderBy('name')
+
+    if (user_id && title && tags) {
+      const filterTags = tags.split(',').map(tag => tag.trim())
+
+      if (!filterTags.length > 1) {
+        throw new ClientError('Pelo menos uma tag precisa ser informada')
+      }
+
+      notes = await knex('movie_tags')
+        .select([
+          'movie_notes.id',
+          'movie_notes.title',
+          'movie_notes.description',
+          'movie_notes.rating',
+          'movie_notes.user_id'
+        ])
+        .where('movie_notes.user_id', user_id)
+        .whereLike('movie_notes.title', `%${title}%`)
+        .whereIn('name', filterTags)
+        .innerJoin('movie_notes', 'movie_notes.id', 'movie_tags.note_id')
+        .orderBy('movie_notes.title')
+    } else if (user_id && title) {
+      notes = await knex('movie_notes')
+        .where({ user_id })
+        .whereLike('title', `%${title}%`)
+        .orderBy('title')
+    } else if (user_id && tags) {
+      const filterTags = tags.split(',').map(tag => tag.trim())
+
+      if (!filterTags.length > 1) {
+        throw new ClientError('Pelo menos uma tag precisa ser informada')
+      }
+
+      notes = await knex('movie_tags')
+        .select([
+          'movie_notes.id',
+          'movie_notes.title',
+          'movie_notes.description',
+          'movie_notes.rating',
+          'movie_notes.user_id'
+        ])
+        .where('movie_notes.user_id', user_id)
+        .whereIn('name', filterTags)
+        .innerJoin('movie_notes', 'movie_notes.id', 'movie_tags.note_id')
+        .orderBy('movie_notes.title')
+    } else if (title && tags) {
+      const filterTags = tags.split(',').map(tag => tag.trim())
+
+      if (!filterTags.length > 1) {
+        throw new ClientError('Pelo menos uma tag precisa ser informada')
+      }
+
+      notes = await knex('movie_tags')
+        .select([
+          'movie_notes.id',
+          'movie_notes.title',
+          'movie_notes.description',
+          'movie_notes.rating',
+          'movie_notes.user_id'
+        ])
+        .whereLike('movie_notes.title', `%${title}%`)
+        .whereIn('name', filterTags)
+        .innerJoin('movie_notes', 'movie_notes.id', 'movie_tags.note_id')
+        .orderBy('movie_notes.title')
+    } else if (user_id) {
+      const user = await knex('users').where({ id: user_id }).first()
+
+      if (!user) {
+        throw new ClientError('O usuário não foi encontrado')
+      }
+      notes = await knex('movie_notes').where({ user_id }).orderBy('title')
+    } else if (title) {
+      notes = await knex('movie_notes')
+        .whereLike('title', `%${title}%`)
+        .orderBy('title')
+    } else if (tags) {
+      const filterTags = tags.split(',').map(tag => tag.trim())
+
+      if (!filterTags.length > 1) {
+        throw new ClientError('Pelo menos uma tag precisa ser informada')
+      }
+
+      notes = await knex('movie_tags')
+        .select([
+          'movie_notes.id',
+          'movie_notes.title',
+          'movie_notes.description',
+          'movie_notes.rating',
+          'movie_notes.user_id'
+        ])
+        .whereIn('name', filterTags)
+        .innerJoin('movie_notes', 'movie_notes.id', 'movie_tags.note_id')
+        .orderBy('movie_notes.title')
+    }
+
+    const notesWithTags = notes.map(note => {
+      const notesTags = baseTags.filter(tag => tag.note_id === note.id)
+
+      return {
+        ...note,
+        tags: notesTags
+      }
+    })
+
+    return response.json(notesWithTags)
+  }
 }
 
 export default NotesController
