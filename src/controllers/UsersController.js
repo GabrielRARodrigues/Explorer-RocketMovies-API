@@ -31,8 +31,7 @@ class UsersController {
   }
 
   async show(request, response) {
-    const { id } = request.params
-
+    const { id } = request.user
     const userSearched = await knex('users').where({ id }).first()
 
     if (!userSearched) {
@@ -51,8 +50,7 @@ class UsersController {
   }
 
   async delete(request, response) {
-    const { id } = request.params
-
+    const { id } = request.user
     const userSearched = await knex('users').where({ id }).first()
 
     if (!userSearched) {
@@ -66,7 +64,7 @@ class UsersController {
 
   async update(request, response) {
     const { name, email, password, old_password } = request.body
-    const { id } = request.params
+    const { id } = request.user
 
     const userSearched = await knex('users').where({ id }).first()
 

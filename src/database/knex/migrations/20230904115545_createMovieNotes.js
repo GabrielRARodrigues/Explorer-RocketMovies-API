@@ -4,11 +4,7 @@ export const up = knex =>
     table.text('title').notNullable()
     table.text('description')
     table.integer('rating', 5)
-    table
-      .integer('user_id')
-      .references('id')
-      .inTable('users')
-      .onDelete('CASCADE')
+    table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE')
     table.timestamp('created_at').default(knex.fn.now())
     table.timestamp('updated_at').default(knex.fn.now())
   })

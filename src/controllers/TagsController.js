@@ -3,7 +3,7 @@ import ClientError from '../utils/errors/ClientError.js'
 
 class TagsController {
   async index(request, response) {
-    const { user_id } = request.params
+    const user_id = request.user.id
 
     const user = await knex('users').where({ id: user_id }).first()
 
@@ -11,7 +11,7 @@ class TagsController {
       throw new ClientError('Não existe um usuário com o id informado')
     }
 
-    const tags = await knex('movie_tags').where({ user_id })
+    const tags = await knex('movie_tags').where({ user_id }).groupBy('name')
 
     return response.json(tags)
   }

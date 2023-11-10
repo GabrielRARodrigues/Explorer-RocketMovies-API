@@ -4,12 +4,14 @@ import 'express-async-errors'
 import routes from './routes/index.js'
 import ClientError from './utils/errors/ClientError.js'
 import runConnection from './database/knex/index.js'
+import cors from 'cors'
 
 runConnection.migrate.latest()
 
 const app = express()
 const PORT = 3330
 
+app.use(cors())
 app.use(express.json())
 app.use(routes)
 
