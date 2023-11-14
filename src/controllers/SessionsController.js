@@ -15,16 +15,16 @@ class SessionsController {
       throw new ClientError('O e-mail e a senha devem ser informados', 401)
     }
 
-    const user = await knex('users').where({ email }).first()
+    const userData = await knex('users').where({ email }).first()
 
-    if (!user) {
+    if (!userData) {
       throw new ClientError(
         'Usuário não encontrado, e-mail e/ou senha incorreta',
         401
       )
     }
 
-    const passwordMatched = await compare(password, user.password)
+    const passwordMatched = await compare(password, userData.password)
 
     if (!passwordMatched) {
       throw new ClientError('E-mai e/ou senha incorreta', 401)
@@ -32,9 +32,11 @@ class SessionsController {
 
     const { secret, expiresIn } = authConfig.jwt
     const token = sign({}, secret, {
-      subject: String(user.id),
+      subject: String(userData.id),
       expiresIn
     })
+
+    const { id, ...user } = userData
 
     return response.json({ user, token })
   }
