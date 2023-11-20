@@ -7,8 +7,10 @@ class NotesController {
     let { rating } = request.body
     const user_id = request.user.id
 
-    if (!title || !description || !rating || !tags) {
-      throw new ClientError('Todos os campos devem ser informados')
+    if (!title || !description || !rating) {
+      throw new ClientError(
+        'Os campos de título, nota e descrição devem ser preenchidos'
+      )
     }
 
     rating = Number(rating)
@@ -32,15 +34,17 @@ class NotesController {
       user_id
     })
 
-    const movieTagsInsert = tags.map(name => {
-      return {
-        name,
-        note_id,
-        user_id
-      }
-    })
+    if (tags) {
+      const movieTagsInsert = tags.map(name => {
+        return {
+          name,
+          note_id,
+          user_id
+        }
+      })
 
-    await knex('movie_tags').insert(movieTagsInsert)
+      await knex('movie_tags').insert(movieTagsInsert)
+    }
 
     return response.json()
   }

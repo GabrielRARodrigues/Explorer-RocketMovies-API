@@ -36,7 +36,7 @@ class SessionsController {
       expiresIn
     })
 
-    const { id, ...user } = userData
+    const { id, password: userPassword, ...user } = userData
 
     return response.json({ user, token })
   }
