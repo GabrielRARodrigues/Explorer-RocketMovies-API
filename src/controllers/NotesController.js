@@ -1,8 +1,9 @@
 import knex from '../database/knex/index.js'
 import ClientError from '../utils/errors/ClientError.js'
+import moment from 'moment'
 
 class NotesController {
-  async create(request, response) {
+  async create(request, response) {src/controllers/UsersController.js
     const { title, description, tags } = request.body
     let { rating } = request.body
     const user_id = request.user.id
@@ -31,7 +32,9 @@ class NotesController {
       title,
       description,
       rating,
-      user_id
+      user_id,
+      created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+      updated_at: moment().format('YYYY-MM-DD HH:mm:ss')
     })
 
     if (tags) {

@@ -1,6 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import knex from '../database/knex/index.js'
 import ClientError from '../utils/errors/ClientError.js'
+import moment from 'moment/moment.js'
 class UsersController {
   async create(request, response) {
     const { name, email, password } = request.body
@@ -24,6 +25,8 @@ class UsersController {
     await knex('users').insert({
       name,
       email,
+      created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+      updated_at: moment().format('YYYY-MM-DD HH:mm:ss'),
       password: hashedPassword
     })
 
@@ -105,12 +108,14 @@ class UsersController {
       userSearched.password = await bcryptjs.hash(password, 8)
     }
 
-    await knex('users').where({ id }).update({
-      name: userSearched.name,
-      email: userSearched.email,
-      password: userSearched.password,
-      updated_at: knex.fn.now()
-    })
+    await knex('users')
+      .where({ id })
+      .update({
+        name: userSearched.name,
+        email: userSearched.email,
+        password: userSearched.password,
+        updated_at: moment().format('YYYY-MM-DD HH:mm:ss')
+      })
 
     return response.status(200).json()
   }
