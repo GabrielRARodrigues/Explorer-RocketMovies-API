@@ -3,7 +3,7 @@ import ClientError from '../utils/errors/ClientError.js'
 import moment from 'moment'
 
 class NotesController {
-  async create(request, response) {src/controllers/UsersController.js
+  async create(request, response) {
     const { title, description, tags } = request.body
     let { rating } = request.body
     const user_id = request.user.id
